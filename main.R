@@ -17,6 +17,8 @@ matches <- str_match(str, pattern = "\\s*(.+),\\s*(.+),\\s*(.+),\\s*(.+)[6,9],\\
 df <- data.frame(matches[, -1], stringsAsFactors=F)
 colnames(df) <- c("date","time","sender","receiver","msg")
 
+#use whatsapp format here
+
 # Format the date and create a row with the number of characters of the messages
 df <- df %>%
   mutate(posix.date=parse_date_time(paste0(date,time),"%d%m%y%H%M%S")) %>%           
@@ -67,7 +69,7 @@ answ.delays <- df.diff %>%
             a5 = sum(between(diff.time, 3600*4+1, 3600*8)),
             a7 = sum(diff.time > (3600*8 + 1)))
 
-# Compute the pourcentage instead of the total number of messages
+# Compute the peurcentage instead of the total number of messages
 answ.delays[, -(1:2)] <- answ.delays[, -(1:2)]/answ.delays$c
 answ.delays <- answ.delays[, -2]
 
@@ -138,8 +140,8 @@ ggplot(data=df.msg.day.user, aes(x=day, y=count, color=sender))+geom_point() +
 
 # Character filtering photos, and stickers!
 df.character <- df %>%
-  filter(msg != "Message photo") %>%
-  filter(msg != "Autocollant")
+  filter(msg != "<image omitted>") %>%
+  filter(msg != "<image omitted>")
 
 ggplot(data=df.character, aes(x=nb.char))+
   geom_histogram(aes(y = (..count..)/sum(..count..)*100), binwidth = 3) + 
@@ -174,8 +176,8 @@ ggplot(data=msgperhour, aes(x=hours, y=msg.count))+geom_histogram(stat="identity
 
 library(tm)
 
-word.toremove <- c(stopwords("en"), stopwords("fr"), 
-                   "cest","message","jai","dont","plus", "photo", "sticker", "autocollant")
+word.toremove <- c(stopwords("en"), stopwords("hi"), 
+                   "image","omitted")
 
 library(SnowballC)
 library(RColorBrewer)
@@ -256,7 +258,7 @@ df.word <- data.frame(classement=1:length(v), word=names(v), freq=v)
 
 ## Analysis for how we e-laugh and e-love
 
-word.toremove <- c(stopwords("en"), stopwords("fr"), 
+word.toremove <- c(stopwords("en"), stopwords("hi"), 
                    "!")
 
 df.lol <- df
@@ -300,7 +302,7 @@ idx.love <- grep(pattern = "love|luv", x = df.word$word)
 idx.smack <- grep(pattern = "smack", x = df.word$word)
 idx.cuddle <- grep(pattern = "cudd|c.lin", x = df.word$word)
 
-df.luve <- data.frame(x=c("bisou","kiss","love","smack","cuddle"), 
+df.luve <- data.frame(x=c("kiss","love","smack","cuddle"), 
                       y = c(sum(df.word$freq[idx.bis]),
                             sum(df.word$freq[idx.kiss]),
                             sum(df.word$freq[idx.love]),
